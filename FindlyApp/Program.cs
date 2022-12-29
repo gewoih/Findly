@@ -1,6 +1,9 @@
-using FindlyApp.Data;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using FindlyApp.Data;
+using FindlyApp.Areas.Identity.Data;
 
 namespace FindlyApp
 {
@@ -9,11 +12,15 @@ namespace FindlyApp
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            var connectionString = builder.Configuration.GetConnectionString("IdentityContextConnection") ?? throw new InvalidOperationException("Connection string 'IdentityContextConnection' not found.");
+
+            builder.Services.AddDbContext<IdentityContext>(options => options.UseSqlServer(connectionString));
+
+            builder.Services.AddDefaultIdentity<User>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<IdentityContext>();
 
             // Add services to the container.
             builder.Services.AddRazorPages();
             builder.Services.AddServerSideBlazor();
-            builder.Services.AddSingleton<WeatherForecastService>();
 
             var app = builder.Build();
 
