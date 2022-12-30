@@ -1,0 +1,42 @@
+﻿@page "/geolocation"
+@using System.Text.Json.Nodes;
+@inject IJSRuntime _jsRuntime;
+
+<h3>Geolocation</h3>
+
+<div>
+    Your coordinates:
+    <ul>
+        <li>Latitude: @_latitude</li>
+        <li>Longitude: @_longitude</li>
+    </ul>
+</div>
+
+@code 
+{
+    private string _latitude = string.Empty;
+    private string _longitude = string.Empty;
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+            ThreadPool.QueueUserWorkItem(async (object obj) => await UpdateGeolocation());
+    }
+
+    private async Task UpdateGeolocation()
+    {
+        await _jsRuntime.InvokeAsync<JsonArray>("watchGeolocation");
+
+        while (true)
+        {
+            var location = await _jsRuntime.InvokeAsync<JsonArray>("getGeolocation");
+
+            _latitude = location[0].ToString();
+            _longitude = location[1].ToString();
+
+            await InvokeAsync(StateHasChanged);
+
+            await Task.Delay(5000);
+        }
+    }
+}
