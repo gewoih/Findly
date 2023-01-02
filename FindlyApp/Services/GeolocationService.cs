@@ -1,4 +1,5 @@
-﻿using Microsoft.JSInterop;
+﻿using FindlyLibrary.Models;
+using Microsoft.JSInterop;
 using System.Globalization;
 using System.Text.Json.Nodes;
 
@@ -6,15 +7,14 @@ namespace FindlyApp.Services
 {
     public sealed class GeolocationService : IDisposable
     {
-        public Guid _userId { get; private set; }
-        public double _currentLatitude { get; private set; }
-        public double _currentLongitude { get; private set; }
+        public Guid UserId { get; private set; }
+        public Geolocation Geolocation { get; private set; } = new();
         public Func<double, double, Task> OnGeolocationChanged;
         private bool _isServiceWorking = true;
 
 		public void StartUpdatingUserGeolocation(Guid userId, IJSRuntime jsRuntime)
         {
-            _userId = userId;
+            UserId = userId;
 
             ThreadPool.QueueUserWorkItem(async (object obj) =>
             {
@@ -37,12 +37,13 @@ namespace FindlyApp.Services
                 var newLatitude = double.Parse(newLocation[0].ToString(), CultureInfo.InvariantCulture);
                 var newLongitude = double.Parse(newLocation[1].ToString(), CultureInfo.InvariantCulture);
 
-                if (_currentLatitude != newLatitude || _currentLongitude != newLongitude)
+                if (Geolocation.Latitude != newLatitude || Geolocation.Longitude != newLongitude)
                 {
-                    _currentLatitude = newLatitude;
-                    _currentLongitude = newLongitude;
+                    Geolocation.Latitude = newLatitude;
+                    Geolocation.Longitude = newLongitude;
 
-                    OnGeolocationChanged?.Invoke(_currentLatitude, _currentLongitude);
+                    await UserGeolocationUtils.UpdateUserGeolocation(UserId, Geolocation);
+                    OnGeolocationChanged?.Invoke(Geolocation.Latitude, Geolocation.Longitude);
                 }
             }
             catch (JSDisconnectedException exception)

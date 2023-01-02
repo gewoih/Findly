@@ -1,0 +1,73 @@
+﻿@page "/geolocation"
+
+@using FindlyApp.Services;
+@using System.Security.Claims;
+
+@inject IJSRuntime JsRuntime;
+@inject GeolocationService GeolocationService;
+@inject IHttpContextAccessor HttpContextAccessor;
+@inject NavigationManager NavigationManager;
+
+@implements IDisposable;
+
+<h3>Geolocation</h3>
+
+<div>
+	Your coordinates:
+	<ul>
+        <li>Latitude: @GeolocationService.Geolocation.Latitude</li>
+        <li>Longitude: @GeolocationService.Geolocation.Longitude</li>
+	</ul>
+</div>
+
+<div id="map"></div>
+
+@code 
+{
+	private Guid _currentUserId;
+
+	protected override void OnInitialized()
+	{
+		base.OnInitialized();
+
+		var userClaim = HttpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
+		if (userClaim is null)
+		{
+			NavigationManager.NavigateTo("/login", true);
+		}
+		else
+		{
+			_currentUserId = Guid.Parse(userClaim.Value);
+			GeolocationService.OnGeolocationChanged += GeolocationService_OnGeolocationChanged;
+		}
+	}
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			GeolocationService.StartUpdatingUserGeolocation(_currentUserId, JsRuntime);
+
+			while (GeolocationService.Geolocation.Latitude == 0 && GeolocationService.Geolocation.Longitude == 0)
+			{
+				await Task.Delay(1);
+			}
+
+			await JsRuntime.InvokeVoidAsync("drawMap", GeolocationService.Geolocation.Latitude, GeolocationService.Geolocation.Longitude);
+		}
+
+		await base.OnAfterRenderAsync(firstRender);
+	}
+
+	private async Task GeolocationService_OnGeolocationChanged(double newLatitude, double newLongitude)
+	{
+		await InvokeAsync(StateHasChanged);
+
+		await JsRuntime.InvokeVoidAsync("changeGeolocation", newLatitude, newLongitude);
+	}
+
+	public void Dispose()
+	{
+		GeolocationService.Dispose();
+	}
+}

@@ -23,6 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\FindlyApp\FindlyApp.csproj" />
     <ProjectReference Include="..\FindlyLibrary\FindlyLibrary.csproj" />
   </ItemGroup>
 

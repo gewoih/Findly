@@ -2,13 +2,12 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using FindlyApp.Data;
 using FindlyApp.Areas.Identity.Data;
 using FindlyApp.Services;
 
 namespace FindlyApp
 {
-    public class Program
+	public class Program
     {
         public static void Main(string[] args)
         {
@@ -20,9 +19,7 @@ namespace FindlyApp
 
             builder.Services.AddDefaultIdentity<User>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<IdentityContext>();
 
-
             builder.Services.AddScoped<GeolocationService>();
-
 
             // Add services to the container.
             builder.Services.AddRazorPages();
