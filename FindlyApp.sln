@@ -5,6 +5,10 @@ VisualStudioVersion = 17.4.33205.214
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FindlyApp", "FindlyApp\FindlyApp.csproj", "{473D0EF3-3FE8-4A0A-985D-A8738F5B98D8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FindlyDAL", "FindlyDAL\FindlyDAL.csproj", "{5B9A43EE-A9C3-44B2-B489-D16F9F1CFE92}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FindlyLibrary", "FindlyLibrary\FindlyLibrary.csproj", "{31ABD726-A6CA-42D9-9A1D-FEBA7C0F22B6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +19,14 @@ Global
 		{473D0EF3-3FE8-4A0A-985D-A8738F5B98D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{473D0EF3-3FE8-4A0A-985D-A8738F5B98D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{473D0EF3-3FE8-4A0A-985D-A8738F5B98D8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5B9A43EE-A9C3-44B2-B489-D16F9F1CFE92}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5B9A43EE-A9C3-44B2-B489-D16F9F1CFE92}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5B9A43EE-A9C3-44B2-B489-D16F9F1CFE92}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5B9A43EE-A9C3-44B2-B489-D16F9F1CFE92}.Release|Any CPU.Build.0 = Release|Any CPU
+		{31ABD726-A6CA-42D9-9A1D-FEBA7C0F22B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{31ABD726-A6CA-42D9-9A1D-FEBA7C0F22B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{31ABD726-A6CA-42D9-9A1D-FEBA7C0F22B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{31ABD726-A6CA-42D9-9A1D-FEBA7C0F22B6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
