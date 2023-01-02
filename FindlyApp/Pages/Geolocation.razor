@@ -19,7 +19,10 @@
         <li>Latitude: @_geolocationService._currentLatitude</li>
         <li>Longitude: @_geolocationService._currentLongitude</li>
 	</ul>
+	
 </div>
+
+	<div id="map"></div>
 
 @code 
 {
@@ -41,17 +44,28 @@
 		}
 	}
 
-	protected override Task OnAfterRenderAsync(bool firstRender)
+	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
 		if (firstRender)
+		{
 			_geolocationService.StartUpdatingUserGeolocation(_currentUserId, _jsRuntime);
 
-		return base.OnAfterRenderAsync(firstRender);
+			while (_geolocationService._currentLatitude == 0 && _geolocationService._currentLongitude == 0)
+			{
+				await Task.Delay(1);
+			}
+			
+			await _jsRuntime.InvokeVoidAsync("drawMap", _geolocationService._currentLatitude, _geolocationService._currentLongitude);
+		}
+
+		await base.OnAfterRenderAsync(firstRender);
 	}
 
-	private async Task GeolocationService_OnGeolocationChanged()
+	private async Task GeolocationService_OnGeolocationChanged(double newLatitude, double newLongitude)
 	{
 		await InvokeAsync(StateHasChanged);
+
+		await _jsRuntime.InvokeVoidAsync("changeGeolocation", newLatitude, newLongitude);
 	}
 
 	public void Dispose()

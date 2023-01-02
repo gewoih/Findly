@@ -9,8 +9,7 @@ namespace FindlyApp.Services
         public Guid _userId { get; private set; }
         public double _currentLatitude { get; private set; }
         public double _currentLongitude { get; private set; }
-        
-        public Func<Task> OnGeolocationChanged;
+        public Func<double, double, Task> OnGeolocationChanged;
         private bool _isServiceWorking = true;
 
 		public void StartUpdatingUserGeolocation(Guid userId, IJSRuntime jsRuntime)
@@ -29,7 +28,6 @@ namespace FindlyApp.Services
             });
         }
 		
-
         private async Task UpdateGeolocationAsync(IJSRuntime jsRuntime)
         {
             try
@@ -44,7 +42,7 @@ namespace FindlyApp.Services
                     _currentLatitude = newLatitude;
                     _currentLongitude = newLongitude;
 
-                    OnGeolocationChanged?.Invoke();
+                    OnGeolocationChanged?.Invoke(_currentLatitude, _currentLongitude);
                 }
             }
             catch (JSDisconnectedException exception)
