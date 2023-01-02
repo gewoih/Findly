@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using FindlyApp.Data;
 using FindlyApp.Areas.Identity.Data;
+using FindlyApp.Services;
 
 namespace FindlyApp
 {
@@ -18,6 +19,10 @@ namespace FindlyApp
             builder.Services.AddDbContext<IdentityContext>(options => options.UseNpgsql(connectionString));
 
             builder.Services.AddDefaultIdentity<User>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<IdentityContext>();
+
+
+            builder.Services.AddScoped<GeolocationService>();
+
 
             // Add services to the container.
             builder.Services.AddRazorPages();
@@ -38,6 +43,11 @@ namespace FindlyApp
             app.UseStaticFiles();
 
             app.UseRouting();
+
+            app.UseAuthorization();
+
+            app.Urls.Add("http://::1337");
+            app.Urls.Add("https://::1488");
 
             app.MapBlazorHub();
             app.MapFallbackToPage("/_Host");

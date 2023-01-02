@@ -7,11 +7,12 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, initial-scale=1,maximum-scale=1,user-scalable=no" />
     <base href="~/" />
     <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
     <link href="css/site.css" rel="stylesheet" />
     <link href="FindlyApp.styles.css" rel="stylesheet" />
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.11.0/mapbox-gl.css" rel="stylesheet">
     <link rel="icon" type="image/png" href="favicon.png"/>
     <component type="typeof(HeadOutlet)" render-mode="ServerPrerendered" />
 </head>
@@ -31,36 +32,9 @@
 
     <script src="_framework/blazor.server.js"></script>
 
-    <script>
-        const options = {
-            enableHighAccuracy: true,
-            timeout: 5000,
-            maximumAge: 0
-        };
+    <script src="~/scripts/Geolocation.js"></script>
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.11.0/mapbox-gl.js"></script>
+    <script src="~/scripts/WorldMap.js"></script>
 
-        let latitude = 0;
-        let longitude = 0;
-
-        getGeolocation = async () => 
-        {
-            return [latitude, longitude];
-        };
-
-        function onPositionUpdate(pos) 
-        {
-            latitude = pos.coords.latitude;
-            longitude = pos.coords.longitude;
-        }
-
-        function onError(err) 
-        {
-            console.error(`ERROR(${err.code}): ${err.message}`);
-        }
-
-        watchGeolocation = async () =>
-        {
-            id = navigator.geolocation.watchPosition(onPositionUpdate, onError, options);
-        }
-    </script>
 </body>
 </html>

@@ -1,42 +1,61 @@
 ﻿@page "/geolocation"
+
 @using System.Text.Json.Nodes;
+@using FindlyApp.Services;
+@using System.Security.Claims;
+
 @inject IJSRuntime _jsRuntime;
+@inject GeolocationService _geolocationService;
+@inject IHttpContextAccessor _httpContextAccessor;
+@inject NavigationManager _navigationManager;
+
+@implements IDisposable;
 
 <h3>Geolocation</h3>
 
 <div>
-    Your coordinates:
-    <ul>
-        <li>Latitude: @_latitude</li>
-        <li>Longitude: @_longitude</li>
-    </ul>
+	Your coordinates:
+	<ul>
+        <li>Latitude: @_geolocationService._currentLatitude</li>
+        <li>Longitude: @_geolocationService._currentLongitude</li>
+	</ul>
 </div>
 
 @code 
 {
-    private string _latitude = string.Empty;
-    private string _longitude = string.Empty;
+	private Guid _currentUserId;
 
-    protected override void OnAfterRender(bool firstRender)
-    {
-        if (firstRender)
-            ThreadPool.QueueUserWorkItem(async (object obj) => await UpdateGeolocation());
-    }
+	protected override void OnInitialized()
+	{
+		base.OnInitialized();
 
-    private async Task UpdateGeolocation()
-    {
-        await _jsRuntime.InvokeAsync<JsonArray>("watchGeolocation");
+		var userClaim = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
+		if (userClaim is null)
+		{
+			_navigationManager.NavigateTo("/login", true);
+		}
+		else
+		{
+			_currentUserId = Guid.Parse(userClaim.Value);
+			_geolocationService.OnGeolocationChanged += GeolocationService_OnGeolocationChanged;
+		}
+	}
 
-        while (true)
-        {
-            var location = await _jsRuntime.InvokeAsync<JsonArray>("getGeolocation");
+	protected override Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+			_geolocationService.StartUpdatingUserGeolocation(_currentUserId, _jsRuntime);
 
-            _latitude = location[0].ToString();
-            _longitude = location[1].ToString();
+		return base.OnAfterRenderAsync(firstRender);
+	}
 
-            await InvokeAsync(StateHasChanged);
+	private async Task GeolocationService_OnGeolocationChanged()
+	{
+		await InvokeAsync(StateHasChanged);
+	}
 
-            await Task.Delay(5000);
-        }
-    }
+	public void Dispose()
+	{
+		_geolocationService.Dispose();
+	}
 }
