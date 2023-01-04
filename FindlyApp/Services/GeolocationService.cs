@@ -11,7 +11,7 @@ namespace FindlyApp.Services
         public Geolocation Geolocation { get; private set; } = new();
         public List<UserGeolocation> FriendsGeolocations { get; private set; } = new();
         public Func<double, double, Task> OnUserGeolocationChanged;
-        public Func<Task> OnFriendsGeolocationChanged;
+        public Func<IEnumerable<UserGeolocation>, Task> OnFriendsGeolocationChanged;
 
         private bool _isServiceWorking = true;
 
@@ -40,7 +40,7 @@ namespace FindlyApp.Services
             if (updatedFriendsGeolocations.Any())
             {
                 FriendsGeolocations = newFriendsGeolocations;
-                OnFriendsGeolocationChanged?.Invoke();
+                OnFriendsGeolocationChanged?.Invoke(updatedFriendsGeolocations);
             }
 		}
 

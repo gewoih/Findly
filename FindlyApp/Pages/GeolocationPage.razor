@@ -2,6 +2,7 @@
 
 @using FindlyApp.Services;
 @using System.Security.Claims;
+@using FindlyLibrary.Models;
 
 @inject IJSRuntime JsRuntime;
 @inject GeolocationService GeolocationService;
@@ -85,9 +86,14 @@
 		await base.OnAfterRenderAsync(firstRender);
 	}
 
-	private async Task GeolocationService_OnFriendsGeolocationsChanged()
+	private async Task GeolocationService_OnFriendsGeolocationsChanged(IEnumerable<UserGeolocation> newUserGeolocations)
 	{
 		await InvokeAsync(StateHasChanged);
+
+		foreach (var userGeolocation in newUserGeolocations)
+		{
+			await JsRuntime.InvokeVoidAsync("updateFriendGeolocation", userGeolocation.UserId.ToString(), userGeolocation.Geolocation.Latitude, userGeolocation.Geolocation.Longitude);
+		}
 	}
 
 	private async Task GeolocationService_OnUserGeolocationChanged(double newLatitude, double newLongitude)
@@ -95,7 +101,7 @@
 		await InvokeAsync(StateHasChanged);
 
 		//Вынести в сервис
-		await JsRuntime.InvokeVoidAsync("changeGeolocation", newLatitude, newLongitude);
+		await JsRuntime.InvokeVoidAsync("updateUserGeolocation", newLatitude, newLongitude);
 	}
 
 	public void Dispose()
