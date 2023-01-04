@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FindlyDAL.Controllers
 {
-	[Route("api/[controller]")]
+    [Route("api/[controller]")]
 	public class UsersController : Controller
 	{
 		private readonly IdentityContext _identityContext;

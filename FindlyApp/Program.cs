@@ -1,8 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using FindlyApp.Services;
 using FindlyLibrary.Models;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using FindlyDAL.Contexts;
 
 namespace FindlyApp
 {
