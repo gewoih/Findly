@@ -18,6 +18,28 @@
         <li>Latitude: @GeolocationService.Geolocation.Latitude</li>
         <li>Longitude: @GeolocationService.Geolocation.Longitude</li>
 	</ul>
+
+	Your friends:
+	<table class="table">
+		<thead class="table-dark">
+			<tr>
+				<th>UserId</th>
+				<th>Latitude</th>
+				<th>Longitude</th>
+			</tr>
+		</thead>
+
+		<tbody>
+			@foreach (var userGeolocation in GeolocationService.FriendsGeolocations)
+			{
+				<tr>
+					<td>@userGeolocation.UserId</td>
+					<td>@userGeolocation.Geolocation.Latitude</td>
+					<td>@userGeolocation.Geolocation.Longitude</td>
+				</tr>	
+			}
+		</tbody>
+	</table>
 </div>
 
 <div id="map"></div>
@@ -38,7 +60,9 @@
 		else
 		{
 			_currentUserId = Guid.Parse(userClaim.Value);
-			GeolocationService.OnGeolocationChanged += GeolocationService_OnGeolocationChanged;
+
+			GeolocationService.OnUserGeolocationChanged += GeolocationService_OnUserGeolocationChanged;
+			GeolocationService.OnFriendsGeolocationChanged += GeolocationService_OnFriendsGeolocationsChanged;
 		}
 	}
 
@@ -48,21 +72,29 @@
 		{
 			GeolocationService.StartUpdatingUserGeolocation(_currentUserId, JsRuntime);
 
+			//Убрать цикл
 			while (GeolocationService.Geolocation.Latitude == 0 && GeolocationService.Geolocation.Longitude == 0)
 			{
 				await Task.Delay(1);
 			}
 
+			//Вынести в сервис
 			await JsRuntime.InvokeVoidAsync("drawMap", GeolocationService.Geolocation.Latitude, GeolocationService.Geolocation.Longitude);
 		}
 
 		await base.OnAfterRenderAsync(firstRender);
 	}
 
-	private async Task GeolocationService_OnGeolocationChanged(double newLatitude, double newLongitude)
+	private async Task GeolocationService_OnFriendsGeolocationsChanged()
+	{
+		await InvokeAsync(StateHasChanged);
+	}
+
+	private async Task GeolocationService_OnUserGeolocationChanged(double newLatitude, double newLongitude)
 	{
 		await InvokeAsync(StateHasChanged);
 
+		//Вынести в сервис
 		await JsRuntime.InvokeVoidAsync("changeGeolocation", newLatitude, newLongitude);
 	}
 

@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FindlyDAL.Controllers
 {
+	[Route("api/[controller]")]
 	public class GeolocationController : Controller
 	{
 		private readonly GeolocationDbContext _geolocationDbContext;
@@ -41,14 +42,34 @@ namespace FindlyDAL.Controllers
 
 		[HttpGet]
 		[Route("get_users_geolocations")]
-		public async Task<Dictionary<Guid, UserGeolocation?>> GetUsersGeolocations([FromHeader] Guid[] usersGuids)
+		public async Task<List<UserGeolocation>> GetUsersGeolocations([FromBody] Guid[] usersGuids)
 		{
-			var usersGeolocations = new Dictionary<Guid, UserGeolocation?>();
+			var usersGeolocations = new List<UserGeolocation>();
 
 			foreach (var userGuid in usersGuids)
 			{
-				var geolocation = await _geolocationDbContext.UsersGeolocations.FirstOrDefaultAsync(ug => ug.UserId == userGuid);
-				usersGeolocations.Add(userGuid, geolocation);
+				var userGeolocation = await _geolocationDbContext.UsersGeolocations
+					.AsNoTracking()
+					.Include(ug => ug.Geolocation)
+					.FirstOrDefaultAsync(ug => ug.UserId == userGuid);
+
+				var newUserGeolocation = new Geolocation
+				{
+					Latitude = 0,
+					Longitude = 0,
+				};
+
+				if (userGeolocation is not null && userGeolocation.Geolocation is not null)
+				{
+					newUserGeolocation.Latitude = userGeolocation.Geolocation.Latitude;
+					newUserGeolocation.Longitude = userGeolocation.Geolocation.Longitude;
+				}
+
+				usersGeolocations.Add(new UserGeolocation
+				{
+					UserId = userGuid,
+					Geolocation = newUserGeolocation
+				});
 			}
 
 			return usersGeolocations;

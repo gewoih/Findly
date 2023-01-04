@@ -9,7 +9,10 @@ namespace FindlyApp.Services
     {
         public Guid UserId { get; private set; }
         public Geolocation Geolocation { get; private set; } = new();
-        public Func<double, double, Task> OnGeolocationChanged;
+        public List<UserGeolocation> FriendsGeolocations { get; private set; } = new();
+        public Func<double, double, Task> OnUserGeolocationChanged;
+        public Func<Task> OnFriendsGeolocationChanged;
+
         private bool _isServiceWorking = true;
 
 		public void StartUpdatingUserGeolocation(Guid userId, IJSRuntime jsRuntime)
@@ -22,13 +25,26 @@ namespace FindlyApp.Services
 
 				while (_isServiceWorking)
                 {
-                    await UpdateGeolocationAsync(jsRuntime);
+                    await UpdateUserGeolocationAsync(jsRuntime);
+                    await UpdateFriendsGeolocationsAsync(jsRuntime);
                     await Task.Delay(5000);
                 }
             });
         }
-		
-        private async Task UpdateGeolocationAsync(IJSRuntime jsRuntime)
+
+		private async Task UpdateFriendsGeolocationsAsync(IJSRuntime jsRuntime)
+		{
+            var newFriendsGeolocations = await UserGeolocationUtils.GetUserFriendsGeolocations(UserId);
+            var updatedFriendsGeolocations = newFriendsGeolocations.Except(FriendsGeolocations);
+
+            if (updatedFriendsGeolocations.Any())
+            {
+                FriendsGeolocations = newFriendsGeolocations;
+                OnFriendsGeolocationChanged?.Invoke();
+            }
+		}
+
+		private async Task UpdateUserGeolocationAsync(IJSRuntime jsRuntime)
         {
             try
             {
@@ -42,8 +58,8 @@ namespace FindlyApp.Services
                     Geolocation.Latitude = newLatitude;
                     Geolocation.Longitude = newLongitude;
 
-                    await UserGeolocationUtils.UpdateUserGeolocation(UserId, Geolocation);
-                    OnGeolocationChanged?.Invoke(Geolocation.Latitude, Geolocation.Longitude);
+                    await UserGeolocationUtils.UpdateUserGeolocationInDatabase(UserId, Geolocation);
+                    OnUserGeolocationChanged?.Invoke(Geolocation.Latitude, Geolocation.Longitude);
                 }
             }
             catch (JSDisconnectedException exception)
@@ -53,7 +69,7 @@ namespace FindlyApp.Services
                 Dispose();
             }
         }
-        
+
         public void Dispose()
 		{
             _isServiceWorking = false;
